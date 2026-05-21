@@ -19,7 +19,6 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
         $search = $request->input('search');
         $role = $request->input('role');
         $users = User::with('roles')
@@ -33,8 +32,7 @@ class UserController extends Controller
                     $q->where('name', '=', $role);
                 });
             })
-            ->paginate($perPage)
-            ->withQueryString();
+            ->get();
 
         return Inertia::render("Users/Index", [
             "users" => $users,

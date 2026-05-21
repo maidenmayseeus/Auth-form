@@ -23,7 +23,10 @@ createInertiaApp({
             .use(PrimeVue, {
                 theme: {
                     preset: Lara,
-                    
+                    options: {
+                      darkModeSelector: '.dark'
+                    }
+
                 }
             })
             .mount(el);

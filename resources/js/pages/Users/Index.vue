@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { FilterMatchMode } from '@primevue/core/api';
+import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
@@ -130,6 +131,7 @@ const form = useForm({
   email: '',
   password: '',
   password_confirmation: '',
+  avatar: '',
   verified_email: false,
   roles: [],
   is_active: true,
@@ -138,9 +140,17 @@ const selectedUsers = ref()
 const usersDialog = ref(false)
 const submitted = ref(false)
 const openNew = () => {
-  user.value = {}
+  user.value = {};
+  form.reset();
   usersDialog.value = true;
-  submitted.value = false
+  submitted.value = false;
+}
+const openEdit = (usr) => {
+  user.value = Object.assign(form, usr)
+  form.roles = form?.roles[0]?.id;
+  usersDialog.value = true;
+  console.log(user.value);
+
 }
 const hideDialog = () => {
   usersDialog.value = false;
@@ -150,19 +160,30 @@ const saveUser = () => {
   submitted.value = true;
   if (form.name?.trim()) {
     if (user.value.id) {
-      props.users.value[findIndexById(user.value.id)] = user.value
+      console.log("masuk edit coy");
+      form.patch(route('users.update', user.value.id), {
+        onSuccess: (success) => {
+          usersDialog.value = false
+          user.value = {}
+        },
+        onError: (errors) => {
+          console.log(errors);
+        }
+      })
     }
     else {
+      console.log("masuk new coy");
       form.post(route('users.store'), {
         onSuccess: (success) => {
           usersDialog.value = false
+          user.value = {}
         },
         onError: (errors) => {
           console.log(errors);
         }
       });
     }
-    user.value = {}
+
   }
 }
 
@@ -194,6 +215,12 @@ function validatePassword() {
   rules.hasSpace = /\s/.test(val)
 }
 watch(() => form.password, validatePassword)
+
+const inputFile = ref(null);
+const openInputFile = () => {
+  inputFile.value.click();
+}
+
 </script>
 
 <template>
@@ -254,15 +281,14 @@ watch(() => form.password, validatePassword)
         </Column>
         <Column field="is_active" header="status" sortable>
           <template #body="{ data }">
-            <Tag :value="data.is_active" :severity="getSeverityStatus(data.is_active)"></Tag>
+            <Tag :value="data.is_active" :severity="getSeverityStatus(data.is_active)" @click="toggleStatus(data.id)" class="cursor-pointer"></Tag>
           </template>
         </Column>
         <Column field="action" header="Action">
           <template #body="{ data }">
             <div class="flex gap-2">
-              <Button icon="pi pi-eye" rounded severity="secondary"></Button>
-              <Button icon="pi pi-pencil" rounded severity="info"></Button>
-              <Button icon="pi pi-trash" rounded severity="danger"></Button>
+              <Button icon="pi pi-pencil" rounded severity="info" @click="openEdit(data)"></Button>
+              <Button icon="pi pi-trash" rounded severity="danger" @click="deleteUser(data.id)"></Button>
             </div>
           </template>
         </Column>
@@ -270,6 +296,11 @@ watch(() => form.password, validatePassword)
       <!-- Dialog / Modal -->
       <Dialog v-model:visible="usersDialog" header="User Detail" :modal="true" :style="{ width: '650px' }">
         <div class="flex flex-col gap-6">
+          <div class="flex flex-col items-center">
+            <img src="http://localhost:8000/storage/avatar/373r6AnsdHlA4BbkT0iHEqds840ycjArpI2o7FoJ.jpg" alt=""
+              class="w-50 rounded-full shadow-2xl cursor-pointer hover:opacity-95" @click="openInputFile" />
+            <input type="file" id="avatar" name="avatar"  ref="inputFile" style="display: none;" accept="image/*">
+          </div>
           <div>
             <label for="name">Name</label>
             <InputText id="name" v-model.trim="form.name" required fluid />
@@ -296,11 +327,13 @@ watch(() => form.password, validatePassword)
             <InputError :message="form.errors.password_confirmation" />
           </div>
           <div>
+            <label for="roles">Roles</label>
             <Select v-model="form.roles" :options="roles" option-value="id" option-label="name" fluid />
             <InputError :message="form.errors.roles" />
           </div>
-          <div>
-            <ToggleButton v-model="form.is_active" onLabel="hello" offLabel="wa"></ToggleButton>
+          <div class="flex justify-between">
+            <label for="active">activate the user?</label>
+            <ToggleButton v-model="form.is_active" onLabel="active" offLabel="inactive"></ToggleButton>
           </div>
           <!-- <span>{{ selectedUsers }}</span> -->
         </div>

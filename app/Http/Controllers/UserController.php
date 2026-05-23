@@ -168,6 +168,7 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id,)
     {
+      // dd($request->all());
         $user = User::findOrFail($id);
         if ($user->hasRole('Super Admin') && !auth()->user()->hasRole('Super Admin')) {
             abort(403, 'You are not allowed to edit a Super Admin.');
@@ -200,6 +201,7 @@ class UserController extends Controller
             //     'regex:/^[A-Za-z0-9_\-!@#$%^&*()+=\[\]{}]+$/',
             // ],
             'verified_email' => ['nullable', 'boolean'],
+            'is_active' => 'boolean',
 
         ], [
             'name.required' => 'Name is required.',

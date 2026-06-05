@@ -19,13 +19,13 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 
 Route::get('/', function () {
     return redirect('login');
-    
+
 })->name('home');
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard')->with('message', 'Selamat datang');
 })->middleware(['auth', 'verified'])->name('dashboard'); /*, 'verified' <- bila ingin wajib verifikasi email */
-Auth::routes(['verify' => true]); // untuk verifikasi email
+// Auth::routes(['verify' => true]); // untuk verifikasi email
 Route::get('/auth/google', function () {
     return Socialite::driver('google')->redirect();
 })->name('google.redirect');
@@ -51,7 +51,7 @@ Route::post('profile/avatar', [ProfileController::class, 'updateAvatar'])->name(
 // Roles and Permissions mulai disini
 // users
 Route::middleware(['auth', 'web', 'verified'])->group(function () {
-    
+
 
 Route::resource("users", UserController::class)
 ->only(['create','store'])

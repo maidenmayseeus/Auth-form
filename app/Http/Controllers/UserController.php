@@ -267,8 +267,8 @@ class UserController extends Controller
     {
         $auth = auth()->user();
         $user = User::findOrFail($id);
-        if (!$auth->can('users.toggleStatus')) {
-            abort(403, 'You are not allowed to toggle Status Users.');
+        if (!$auth->can('users.toggleStatus') || $user->hasRole('Super Admin')) {
+            abort(403, 'You are not allowed to toggle this User Status.');
         }
         $user->is_active = !$user->is_active;
         $user->save();

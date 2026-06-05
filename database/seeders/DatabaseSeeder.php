@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         $Sadmin = User::factory()->create([
             'name' => 'SuperAdmin',
-            'username' => 'Sadmin',
-            'email' => 'sadmin@gmail.com',
+            'username' => 'sadmin',
+            'email' => 'sadmin@example.com',
             'email_verified_at' => now(),
         ]);
         $Sadmin->assignRole('Super Admin');
@@ -28,23 +28,23 @@ class DatabaseSeeder extends Seeder
         $admin = User::factory()->create([
             'name' => 'Admin',
             'username' => 'admin',
-            'email' => 'admin@gmail.com',
+            'email' => 'admin@example.com',
             'email_verified_at' => now(),
         ]);
         $admin->assignRole('admin');
-        
+
         $operator = User::factory()->create([
             'name' => 'Operator',
             'username' => 'operator',
-            'email' => 'operator@gmail.com',
+            'email' => 'operator@example.com',
             'email_verified_at' => now(),
         ]);
         $operator->assignRole('operator');
-        
+
         $user = User::factory()->create([
             'name' => 'First User',
             'username' => 'user',
-            'email' => 'user@gmail.com',
+            'email' => 'user@example.com',
             'email_verified_at' => now(),
         ]);
         $user->assignRole('user');

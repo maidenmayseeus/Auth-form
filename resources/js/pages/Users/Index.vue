@@ -18,10 +18,12 @@ import MultiSelect from 'primevue/multiselect';
 import Password from 'primevue/password';
 import Select from 'primevue/select';
 import Tag from 'primevue/tag';
-import ToggleButton from 'primevue/togglebutton';
 import Toolbar from 'primevue/toolbar';
 import Swal from 'sweetalert2';
 import { computed, defineProps, reactive, ref, watch } from 'vue';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
+
 const page = usePage();
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -41,8 +43,32 @@ const props = defineProps<{
     data: any[],
   }
 }>();
-
-
+// ######################### TOAST SERVICE #########################
+const toast = useToast();
+const showSuccess = () => {
+  toast.add({
+    severity: 'success',
+    summary: 'Changes saved successfully',
+    detail: 'Operation completed successfully without any errors',
+    life: 3000
+  })
+}
+const showInfo = () => {
+  toast.add({
+    severity: '',
+    summary: '',
+    detail: '',
+    life: 3000
+  })
+}
+const showError = () => {
+  toast.add({
+    severity: 'error',
+    summary: 'Failed to save changes',
+    detail: 'Something when wrong. Please try again later',
+    life: 3000
+  })
+}
 const flash = page.props?.flash?.message;
 if (flash) {
   let timerInterval;
@@ -77,6 +103,8 @@ function deleteUser(id) {
     if (result.isConfirmed) {
       router.delete(route('users.destroy', id), {
         onSuccess: () => {
+          showSuccess() ;
+          console.log("[SUCCESS] Operation completed successfully")
           Swal.fire({
             title: 'Deleted!',
             text: 'This user has been deleted.',
@@ -85,7 +113,9 @@ function deleteUser(id) {
             timerProgressBar: true,
           });
         },
-        onError: () => {
+        onError: (errors) => {
+          showError() ;
+          console.log(errors);
           Swal.fire({
             title: 'Failed!',
             text: 'Something went wrong. The role was not deleted.',
@@ -103,9 +133,11 @@ const { getInitials } = useInitials();
 function toggleStatus(id) {
   router.put(route('users.toggleStatus', id), {}, {
     onSuccess: () => {
-
+      showSuccess()
+      console.log("[SUCCESS] Operation completed successfully")
     },
     onError: (errors) => {
+      showError()
       console.error(errors)
     }
   })
@@ -165,8 +197,11 @@ const saveUser = () => {
         onSuccess: (success) => {
           usersDialog.value = false
           user.value = {}
+          showSuccess() ;
+          console.log("[SUCCESS] Operation completed successfully")
         },
         onError: (errors) => {
+          showError() ;
           console.log(errors);
         }
       })
@@ -177,8 +212,11 @@ const saveUser = () => {
         onSuccess: (success) => {
           usersDialog.value = false
           user.value = {}
+          showSuccess() ;
+          console.log("[SUCCESS] Operation completed successfully")
         },
         onError: (errors) => {
+          showError()
           console.log(errors);
         }
       });
@@ -227,10 +265,12 @@ const openInputFile = () => {
 
   <Head title="Users" />
   <AppLayout :breadcrumbs="breadcrumbs">
+    <Toast/>
     <div class="card">
       <Toolbar>
         <template #start>
           <Button label="New" icon="pi pi-plus" class="mr-2" @click="openNew" />
+          <Button label="success" @click="showSuccess"></Button>
           <Button label="Delete" icon="pi pi-trash" severity="danger" variant="outlined" @click="confirmDeleteSelected"
             :disabled="!selectedProducts || !selectedProducts.length" />
         </template>
@@ -271,7 +311,7 @@ const openInputFile = () => {
         <Column field="role_ids" header="Role" :show-filter-menu="true" :show-filter-match-modes="false">
           <template #body="{ data }">
             <div class="flex">
-              <span v-for="role in data.roles" class="bg-green-50  p-2 rounded-2xl">{{ role.name }}</span>
+              <span v-for="role in data.roles" class="bg-green-50 dark:bg-secondary  p-2 rounded-2xl">{{ role.name }}</span>
             </div>
           </template>
           <template #filter="{ filterModel, filterCallback }">
@@ -333,7 +373,7 @@ const openInputFile = () => {
           </div>
           <div class="flex justify-between">
             <label for="active">activate the user?</label>
-            <ToggleButton v-model="form.is_active" onLabel="active" offLabel="inactive"></ToggleButton>
+            <Button v-model="form.is_active" onLabel="active" offLabel="inactive"></Button>
           </div>
           <!-- <span>{{ selectedUsers }}</span> -->
         </div>
